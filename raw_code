@@ -1,0 +1,126 @@
+import pyttsx3 #pip install pyttsx3
+import speech_recognition as sr #pip install speechRecognition
+import datetime
+import wikipedia #pip install wikipedia
+import webbrowser
+import os
+import smtplib
+import pyaudio
+
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+# print(voices[1].id)
+engine.setProperty('voice', voices[1].id)
+
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
+
+def wishMe():
+    hour = int(datetime.datetime.now().hour)
+    if hour>=0 and hour<12:
+        speak("Good Morning!")
+
+    elif hour>=12 and hour<18:
+        speak("Good Afternoon!")   
+
+    else:
+        speak("Good Evening!")  
+
+    speak("Sir, I am your voice operated desktop computer assistant, but please call me vodca. What can I do for you?")       
+
+def takeCommand():
+    #It takes microphone input from the user and returns string output
+
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source)
+
+    try:
+        print("Recognizing...")    
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+
+    except Exception as e:
+        # print(e)    
+        print("Say that again please...")  
+        return "None"
+    return query
+
+# Function for mail id. 
+def sendEmail(to, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login('#enter the gmail id', 'password for the id')
+    server.sendmail('#enter the gmail id', to, content)
+    server.close()
+
+if __name__ == "__main__":
+    wishMe()
+    while True:
+    # if 1:
+        query = takeCommand().lower()
+
+        # Logic for executing tasks based on query
+        if 'wikipedia' in query:
+            speak('oh yes I can tell you something aboout that')
+            query = query.replace("wikipedia", "")
+            results = wikipedia.summary(query, sentences=2)
+            speak("According to Wikipedia")
+            print(results)
+            speak(results)
+
+        elif 'open youtube' in query:
+            webbrowser.open("youtube.com")
+
+        elif 'open google' in query:
+            webbrowser.open("google.com")
+
+        elif 'open stackoverflow' in query:
+            webbrowser.open("stackoverflow.com")   
+
+
+        elif 'play music' in query:
+            music_dir = 'H:\\songs'
+            songs = os.listdir(music_dir)
+            print(songs)    
+            os.startfile(os.path.join(music_dir, songs[0]))
+
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")    
+            speak(f"Sir, the time is {strTime}")
+
+        elif 'Make a call' in query:
+            codePath = "C:\\Users\\HP\\AppData\\Local\\WebEx\\WebEx\\Applications\\ptoneclk.exe"  #enter the path for webex, try opening without it's API.
+            os.startfile(codePath)
+
+        elif 'email to mummy' in query:
+            try:
+                speak("What should I say?")
+                content = takeCommand()
+                to = "recepient's mail id"    
+                sendEmail(to, content)
+                speak("Email has been sent!")
+            except Exception as e:
+                print(e)
+                speak("Sorry Sir, the mail could not be sent, please run a diagnostic")
+         
+        elif 'who are you' in query: 
+            speak("I am a voice operated desktop computer assistant, something like SIRI or JARVIS, but not that good, not now atleast.Please call me VODKA")
+            
+        elif 'who made you' in query:
+            speak("I was made by Mr Himanshu Khale, I was told that I am one of his first projects.")
+            
+        elif 'what all can you do?' in query: 
+            speak("I can open Youtube or google or any other websites on voice command, I can make a cisco webex call, I can make a Wikipediea search, I can send mails. I can tell time and play music.")
+            
+        elif 'quit'in query: 
+            print("alright, let me know if you need me for anything")
+            speak("alright, let me know if you need me for anything")
+            break()
